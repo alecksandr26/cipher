@@ -124,6 +124,18 @@ void decryptFile (struct FileToCipher *f)
 void main (int argc, const char *argv[])
 {
     struct FileToCipher file;
+	
+	if (argc == 2 && strcmp(argv[1], "help") == 0) {
+		printf("Usage: %s <file-name> \"<passphrase>\" <'encrypt' || 'decrypt'>\n\n", argv[0]);
+		printf("<file-name> = Your file\n");
+		printf("\"<passphrase>\" = Your key and also you must use (\"\")\n");
+		printf("<'encrypt' || 'decrypt'> = And you must select between 'encrypt' or 'decyprt'\n\n");
+		printf("Example: Encrypt: %s foo_file.txt \"foo_passphrase\" encrypt\n", argv[0]);
+		printf("Example: Decrypt: %s foo_file.txt \"foo_passphrase\" decrypt\n", argv[0]);
+		exit(EXIT_SUCCESS);
+	}
+
+	
 	file.name = (char *) malloc(512);
 	memset(file.name, 0, 512);
 	
