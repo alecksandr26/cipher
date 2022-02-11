@@ -1,7 +1,7 @@
 # cipher
 Is a simple encryption program which encypts any file by a given passphrase.
 
-# Install:
+# Install
 Just run the Makefile.
 ```
 $ make
@@ -17,7 +17,7 @@ To use this program is easy you only need to select your file put a passphrase a
 ```
 $ cipher foo.txt "foopassphrase" encrypt
 ```
-And to decrypt some file you run this.
+And to decrypt some file you can run this.
 ```
 $ cipher foo.txt "foopassphrase" decrypt
 ```
