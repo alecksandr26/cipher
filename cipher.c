@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -118,53 +119,68 @@ void decryptFile (struct FileToCipher *f)
 }
 
 
+/* help: This is a simple help function */
+void help (const char *argv)
+{
+	printf("Usage: %s <file-name> \"<passphrase>\" <'encrypt' || 'decrypt'>\n\n", argv);
+	printf("<file-name> = Your file\n");
+	printf("\"<passphrase>\" = Your key and also you must use (\"\")\n");
+	printf("<'encrypt' || 'decrypt'> = And you must select between 'encrypt' or 'decyprt'\n\n");
+	printf("Example: Encrypt: %s foo_file.txt \"foo_passphrase\" encrypt\n", argv);
+	printf("Example: Decrypt: %s foo_file.txt \"foo_passphrase\" decrypt\n", argv);
+	exit(EXIT_SUCCESS);
+}
+
+
+/* createObject: Here we create and prepare our object */
+struct FileToCipher *createObject ()
+{
+	struct FileToCipher *f = (struct FileToCipher *) malloc(sizeof(struct FileToCipher));
+
+	f->name = (char *) malloc(512);
+	f->passphrase = (char *) malloc(512);
+	f->offsetRead = 0;
+	f->offsetWrite = 0;
+
+	memset(f->name, 0, 512);
+	memset(f->passphrase, 0, 512);
+	
+	return f;
+}
+
 
 
 
 void main (int argc, const char *argv[])
 {
-    struct FileToCipher file;
-	
-	if (argc == 2 && strcmp(argv[1], "help") == 0) {
-		printf("Usage: %s <file-name> \"<passphrase>\" <'encrypt' || 'decrypt'>\n\n", argv[0]);
-		printf("<file-name> = Your file\n");
-		printf("\"<passphrase>\" = Your key and also you must use (\"\")\n");
-		printf("<'encrypt' || 'decrypt'> = And you must select between 'encrypt' or 'decyprt'\n\n");
-		printf("Example: Encrypt: %s foo_file.txt \"foo_passphrase\" encrypt\n", argv[0]);
-		printf("Example: Decrypt: %s foo_file.txt \"foo_passphrase\" decrypt\n", argv[0]);
-		exit(EXIT_SUCCESS);
-	}
+	struct FileToCipher *file;
 
-	
-	file.name = (char *) malloc(512);
-	memset(file.name, 0, 512);
-	
-	file.passphrase = (char *) malloc(512);
-	memset(file.passphrase, 0, 512);
-	
-	file.offsetRead = 0;
-	file.offsetWrite = 0;
-	
+	/* Here we check if we have errors */
+	if (argc == 2 && strcmp(argv[1], "help") == 0)
+		help(argv[0]);
+		
 	if (argc != 4) {
 		fprintf(stderr, "%s: Usage: %s <file-name> \"<passphrase>\" <'encrypt' || 'decrypt'>\n", ERROR, argv[0]);
 		exit(EXIT_FAILURE);
 	}
-	memcpy(file.passphrase, argv[2], 512);
-	
-	
-	file.fd = openFile(argv[1]);
 
-	memcpy(file.name, argv[1], 512);
+	/* Here we create the object and copy the data  and open the file */
+	file = createObject();
+	
+	memcpy(file->passphrase, argv[2], 512);
+	file->fd = openFile(argv[1]);
+	memcpy(file->name, argv[1], 512);
 
+	/* Here we execute the file */
 	if (strcmp(argv[3], "encrypt") == 0)
-		encryptFile(&file);
+		encryptFile(file);
 	else if (strcmp(argv[3], "decrypt") == 0)
-		decryptFile(&file);
+		decryptFile(file);
 	else {
 		fprintf(stderr, "%s: Usage: <mode> = 'encrypt' || 'decrypte'\n", ERROR);
 		exit(EXIT_FAILURE);
 	}
 	
-	close(file.fd);
+	close(file->fd);
 	
 }
