@@ -28,4 +28,4 @@ $ cipher help
 # To do
 1. Hash the passphrase.
 2. Try to encrypt the files and add extra bytes to know if the file was encrypted or not.
-3. Create modules to start the scalability of the project.
+3. Create the encryption module

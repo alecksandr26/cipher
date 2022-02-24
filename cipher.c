@@ -1,70 +1,20 @@
 
+
 #include <stdio.h>
+
 #include <stdlib.h>
 #include <stdbool.h>
-
 #include <errno.h>
 #include <string.h>
+#include <stdint.h>
 
+/* To handle the files */
 #include <unistd.h>
 #include <fcntl.h>
 
-
-
-#define SIZE_BUF 2048
-
-const char ERROR[] = "\033[0;31mError\033[0m";
-
-
-struct FileToCipher {
-	int fd; /* file descriptor */
-	char *name;
-	char *passphrase;
-	unsigned char dataEncrypted[SIZE_BUF];
-	unsigned char dataUnencrypted[SIZE_BUF];
-	unsigned offsetRead;
-	unsigned offsetWrite;
-	unsigned bytesT; /* The num of bytes transferred */
-};
-
-
-/* openFile: This function just opens the file */
-int openFile (const char *fileName)
-{
-	int fd; /* file descriptor */
-	
-	if ((fd = open(fileName, O_RDWR)) < 0) {
-		fprintf(stderr, "%s: Opening the file '%s': %s\n", ERROR, fileName, strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-
-	return fd;
-}
-
-
-/* readFile: This function read the data inside of the file */
-bool readFile (struct FileToCipher *f)
-{	
-	if ((f->bytesT = pread(f->fd, f->dataUnencrypted, SIZE_BUF, f->offsetRead)) ==  0)
-		return false;
-	
-	f->offsetRead += f->bytesT;
-	return true;
-}
-
-
-/* writeFile: This function will write the data inside of the file */
-void writeFile (struct FileToCipher *f)
-{
-	long bytesT; /* bytes transferred */
-	if ((bytesT = pwrite(f->fd, f->dataEncrypted, f->bytesT, f->offsetWrite)) != f->bytesT) {
-		fprintf(stderr, "%s: Error wrinting inside of the file '%s': %s\n",
-				ERROR, f->name, strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-
-	f->offsetWrite += f->bytesT;
-}
+/* Here I include the created modules */
+#include "include/fileobject.h"
+#include "include/errorcipher.h"
 
 
 /* encryptFile: To encrypt the data */
@@ -132,23 +82,6 @@ void help (const char *argv)
 }
 
 
-/* createObject: Here we create and prepare our object */
-struct FileToCipher *createObject ()
-{
-	struct FileToCipher *f = (struct FileToCipher *) malloc(sizeof(struct FileToCipher));
-
-	f->name = (char *) malloc(512);
-	f->passphrase = (char *) malloc(512);
-	f->offsetRead = 0;
-	f->offsetWrite = 0;
-
-	memset(f->name, 0, 512);
-	memset(f->passphrase, 0, 512);
-	
-	return f;
-}
-
-
 
 
 void main (int argc, const char *argv[])
@@ -160,8 +93,8 @@ void main (int argc, const char *argv[])
 		help(argv[0]);
 		
 	if (argc != 4) {
-		fprintf(stderr, "%s: Usage: %s <file-name> \"<passphrase>\" <'encrypt' || 'decrypt'>\n", ERROR, argv[0]);
-		exit(EXIT_FAILURE);
+		sprintf(MSG, "Usage: %s <file-name> \"<passphrase>\" <'encrypt' || 'decrypt'>\n", argv[0]);
+		catchError(MSG);
 	}
 
 	/* Here we create the object and copy the data  and open the file */
@@ -177,8 +110,8 @@ void main (int argc, const char *argv[])
 	else if (strcmp(argv[3], "decrypt") == 0)
 		decryptFile(file);
 	else {
-		fprintf(stderr, "%s: Usage: <mode> = 'encrypt' || 'decrypte'\n", ERROR);
-		exit(EXIT_FAILURE);
+		sprintf(MSG, "Usage: <mode> = 'encrypt' || 'decrypte'\n");
+		catchError(MSG);
 	}
 	
 	close(file->fd);
