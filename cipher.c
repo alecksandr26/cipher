@@ -5,6 +5,7 @@
 #include "include/errorcipher.h"
 #include "include/encrypt.h"
 
+/* encrypt = 73 */
 #define ENCRYPT 0b01001001
 
 /* help: This is a simple help function */

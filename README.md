@@ -38,9 +38,6 @@ Also you can run the program with the argument "help" to see how to use this pro
 ```
 $ cipher help
 ```
-# Todo
-1. Try to encrypt the files and add extra bytes to know if the file was encrypted or not.
-2. Create the encryption module
 # Another functions
 Your can run "check" functionality to know if the file is encrypted or not, like this.
 ```
