@@ -24,7 +24,8 @@ char MSG[255];
 
 /* This is the structure that is going to manage the file */
 struct FileToCipher {
-	int fd; /* file descriptor */
+	int fdRead; /* file descriptor of the reading file */
+	int fdEncrypting; /* file descriptor of the encrypted file */
 	char *name;
 	char *passphrase;
     int8_t dataEncrypted[SIZE_BUF];
@@ -42,6 +43,9 @@ bool readFile (struct FileToCipher *file);
 
 /* writeFile: This function will write the data inside of the file */
 void writeFile (struct FileToCipher *file);
+
+/* wasEncrypt: To know if the file was encrypted or not */
+bool wasEncrypt (struct FileToCipher *file);
 
 /* createObject: Here we create and prepare our object */
 struct FileToCipher *createObject ();

@@ -16,7 +16,7 @@ int openFile (const char *fileName)
 /* readFile: This function read the data inside of the file */
 bool readFile (struct FileToCipher *f)
 {	
-	if ((f->bytesT = pread(f->fd, f->dataUnencrypted, SIZE_BUF, f->offsetRead)) ==  0)
+	if ((f->bytesT = pread(f->fdRead, f->dataUnencrypted, SIZE_BUF, f->offsetRead)) ==  0)
 		return false;
 	
 	f->offsetRead += f->bytesT;
@@ -27,7 +27,7 @@ bool readFile (struct FileToCipher *f)
 void writeFile (struct FileToCipher *f)
 {
 	long bytesT; /* bytes transferred */
-	if ((bytesT = pwrite(f->fd, f->dataEncrypted, f->bytesT, f->offsetWrite)) != f->bytesT) {
+	if ((bytesT = pwrite(f->fdEncrypting, f->dataEncrypted, f->bytesT, f->offsetWrite)) != f->bytesT) {
 		sprintf(MSG, "Error wrinting inside of the file '%s': %s\n", f->name, strerror(errno));
 		catchError(MSG);
 	}
@@ -35,6 +35,15 @@ void writeFile (struct FileToCipher *f)
 	f->offsetWrite += f->bytesT;
 }
 
+/* wasEncrypt: To know if the file was encrypted or not */
+bool wasEncrypt (struct FileToCipher *file)
+{
+	unsigned char byte;
+
+	/* Here we read the mark of the file */
+	read(file->fdRead, &byte, 1);
+	return byte == 1;
+}
 
 /* createObject: Here we create and prepare our object */
 struct FileToCipher *createObject ()

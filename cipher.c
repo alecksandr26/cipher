@@ -1,73 +1,11 @@
-
-
 #include <stdio.h>
-
-#include <stdlib.h>
-#include <stdbool.h>
-#include <errno.h>
-#include <string.h>
-#include <stdint.h>
-
-/* To handle the files */
-#include <unistd.h>
-#include <fcntl.h>
 
 /* Here I include the created modules */
 #include "include/fileobject.h"
 #include "include/errorcipher.h"
+#include "include/encrypt.h"
 
-
-/* encryptFile: To encrypt the data */
-void encryptFile (struct FileToCipher *f)
-{
-	unsigned short c; /* char caracter */
-	int i, i2; /* indexes */
-	
-	/* Iterates the file */
-	while (readFile(f)) {
-		i2 = 0;
-		/* Here we iterate the readed bytes */
-		while (i2 < f->bytesT) {
-			/* Now we iterate the key */
-			for (i = 0; i < strlen(f->passphrase) && i2 < f->bytesT; ++i) {
-				c = f->dataUnencrypted[i2] + *(f->passphrase + i);
-				f->dataEncrypted[i2] = (c % 256);
-				i2++;
-			}
-		}
-		/* Here we write the encrypted bytes */
-		writeFile(f);
-	}
-}
-
-
-
-/* decryptFile: To decrypte the data */
-void decryptFile (struct FileToCipher *f)
-{
-	unsigned short c; /* char caracter */
-	int i, i2; /* indexes */
-	
-	/* Iterates the file */
-	while (readFile(f)) {
-		i2 = 0;
-		/* Here we iterate the readed bytes */
-		while (i2 < f->bytesT) {
-			/* Now we iterate the key */
-			for (i = 0; i < strlen(f->passphrase) && i2 < f->bytesT; ++i) {
-			    if (f->dataUnencrypted[i2] < *(f->passphrase + i)) {
-					c = f->dataUnencrypted[i2] + 256;
-					f->dataEncrypted[i2] = c - *(f->passphrase + i);
-				} else
-					f->dataEncrypted[i2] = f->dataUnencrypted[i2] - *(f->passphrase + i);
-				i2++;
-			}
-		}
-		/* Here we write the uncrypted bytes */
-		writeFile(f);
-	}
-}
-
+#define ENCRYPT 0b01001001
 
 /* help: This is a simple help function */
 void help (const char *argv)
@@ -81,18 +19,36 @@ void help (const char *argv)
 	exit(EXIT_SUCCESS);
 }
 
+/* check: To check if the file was enctyped or not */
+void check (const char *filename)
+{
+	struct FileToCipher *file;
 
+	file = createObject();
+	file->fdRead = openFile(filename);
+	if (wasEncrypt(file))
+		printf("Yeah, the file '%s' is enctyped\n", filename);
+	else
+		printf("No, the file '%s' is not enctyped\n", filename);
+ 
+	exit(EXIT_SUCCESS);
+}
 
 
 void main (int argc, const char *argv[])
 {
 	struct FileToCipher *file;
-
+	unsigned char byte;
+	
 	/* Here we check if we have errors */
 	if (argc == 2 && strcmp(argv[1], "help") == 0)
 		help(argv[0]);
-		
-	if (argc != 4) {
+
+	/* Here I check if the file was encrypted */
+	if (argc == 3 && strcmp(argv[1], "check") == 0)
+		check(argv[2]);
+
+	if (argc != 4 && argc != 3) {
 		sprintf(MSG, "Usage: %s <file-name> \"<passphrase>\" <'encrypt' || 'decrypt'>\n", argv[0]);
 		catchError(MSG);
 	}
@@ -101,19 +57,39 @@ void main (int argc, const char *argv[])
 	file = createObject();
 	
 	memcpy(file->passphrase, argv[2], 512);
-	file->fd = openFile(argv[1]);
+	file->fdRead = openFile(argv[1]);
+	file->fdEncrypting = creat(".encryptingOrDecrypting", 0644);
 	memcpy(file->name, argv[1], 512);
 
-	/* Here we execute the file */
-	if (strcmp(argv[3], "encrypt") == 0)
+	/* Here we execute the action */
+	if (argc == 3) {
+		if (wasEncrypt(file)) {
+			file->offsetRead++;
+			decryptFile(file);
+		} else {
+			byte = ENCRYPT;
+			write(file->fdEncrypting, &byte, 1);
+			file->offsetWrite++;
+			encryptFile(file);
+		}
+	} else if (strcmp(argv[3], "encrypt") == 0 || strcmp(argv[3], "en") == 0) {
+		byte = ENCRYPT;
+		write(file->fdEncrypting, &byte, 1);
+		file->offsetWrite++;
 		encryptFile(file);
-	else if (strcmp(argv[3], "decrypt") == 0)
+	} else if (strcmp(argv[3], "decrypt") == 0 || strcmp(argv[3], "de") == 0) {
+		file->offsetRead++;
 		decryptFile(file);
-	else {
+	} else { /* if the user doens't select the option */
 		sprintf(MSG, "Usage: <mode> = 'encrypt' || 'decrypte'\n");
 		catchError(MSG);
 	}
+
+	close(file->fdRead);
+	close(file->fdEncrypting);
 	
-	close(file->fd);
+	/* here we modify the name of the file */
+	rename(".encryptingOrDecrypting", file->name);
 	
+	exit(EXIT_SUCCESS);
 }

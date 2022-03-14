@@ -13,7 +13,9 @@ $ make move
 And now you are ready to start using the program.
 
 # Usage
-To use the program is easy you only need to select your file put a passphrase and select between "encrypt" or "decrypt", for example to encrypt some  file you can run this.
+There are two ways to encrypt a file, we can specify if we want to encrypt or decrypt some files, just be careful to avoid the destruction of any file.
+## Specifying
+It is easy you only need to select your file put a passphrase and select between "encrypt" or "decrypt", for example to encrypt some  file you can run this.
 ```
 $ cipher foo.txt "foopassphrase" encrypt
 ```
@@ -21,11 +23,26 @@ And to decrypt some file you can run this.
 ```
 $ cipher foo.txt "foopassphrase" decrypt
 ```
+## Without specifying
+It is easier, you only need to put the file and the passphrase, with these we are going to encrypt the file.
+```
+$ cipher foo.txt "foopassphrase"
+```
+And now the file is enctyped to decrypt the file we only need to run the same command.
+```
+$ cipher foo.txt "foopassphrase"
+```
+As I mentioned before be careful running program, because you can destroy some files.
+# Help
 Also you can run the program with the argument "help" to see how to use this program.
 ```
 $ cipher help
 ```
-# To do
-1. Hash the passphrase.
-2. Try to encrypt the files and add extra bytes to know if the file was encrypted or not.
-3. Create the encryption module
+# Todo
+1. Try to encrypt the files and add extra bytes to know if the file was encrypted or not.
+2. Create the encryption module
+# Another functions
+Your can run "check" functionality to know if the file is encrypted or not, like this.
+```
+$ cipher check foo.txt
+```
