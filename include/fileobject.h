@@ -18,9 +18,11 @@
 
 #define SIZE_BUF 2048
 
+/* encrypt = 73 */
+#define ENCRYPT 0b01001001
+
 /* To save the error msg */
 char MSG[255];
-
 
 /* This is the structure that is going to manage the file */
 struct FileToCipher {

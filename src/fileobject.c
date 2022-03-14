@@ -42,7 +42,7 @@ bool wasEncrypt (struct FileToCipher *file)
 
 	/* Here we read the mark of the file */
 	read(file->fdRead, &byte, 1);
-	return byte == 1;
+	return byte == ENCRYPT;
 }
 
 /* createObject: Here we create and prepare our object */
